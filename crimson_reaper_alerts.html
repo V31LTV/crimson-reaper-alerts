@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crimson Reaper Alerts</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   CRIMSON REAPER ALERT SYSTEM
+   For use as a Browser Source in OBS/Streamlabs OBS
+   Recommended size: 600x300 (or full overlay at 1920x1080)
+   ============================================================ */
+
+:root {
+  --crimson:        #8B0000;
+  --crimson-bright: #CC0000;
+  --crimson-glow:   #FF1111;
+  --crimson-deep:   #4A0000;
+  --blood-dark:     #1a0000;
+  --gold:           #C9A84C;
+  --gold-bright:    #FFD700;
+  --ash:            #AAAAAA;
+  --white:          #F0E8E8;
+  --black:          #000000;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: 'Rajdhani', sans-serif;
+}
+
+/* ============================================================
+   ALERT WRAPPER — hidden by default, shown via JS
+   ============================================================ */
+
+.alert-wrapper {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.alert-wrapper.show {
+  animation: alertEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+             alertExit  0.4s ease-in 4.6s forwards;
+}
+
+@keyframes alertEnter {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(60px) scale(0.92); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1); }
+}
+
+@keyframes alertExit {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(0)     scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-30px) scale(0.95); }
+}
+
+/* ============================================================
+   ALERT CARD BASE
+   ============================================================ */
+
+.alert-card {
+  width: 100%;
+  position: relative;
+  background: linear-gradient(135deg,
+    rgba(10,0,0,0.97) 0%,
+    rgba(30,0,0,0.95) 40%,
+    rgba(10,0,0,0.97) 100%
+  );
+  border: 1px solid var(--crimson);
+  clip-path: polygon(16px 0%, 100% 0%, calc(100% - 16px) 100%, 0% 100%);
+  overflow: visible;
+  padding: 0;
+}
+
+/* Glowing border effect */
+.alert-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, var(--crimson-glow), var(--crimson-deep), var(--crimson-glow));
+  clip-path: polygon(16px 0%, 100% 0%, calc(100% - 16px) 100%, 0% 100%);
+  z-index: -1;
+  filter: blur(4px);
+  opacity: 0.6;
+  animation: borderPulse 2s ease-in-out infinite;
+}
+
+@keyframes borderPulse {
+  0%, 100% { opacity: 0.4; filter: blur(3px); }
+  50%       { opacity: 0.9; filter: blur(6px); }
+}
+
+/* Top accent bar */
+.alert-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 16px; right: 16px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--crimson-glow), var(--gold), var(--crimson-glow), transparent);
+  animation: scanline 2s linear infinite;
+}
+
+@keyframes scanline {
+  0%   { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ============================================================
+   ALERT INNER LAYOUT
+   ============================================================ */
+
+.alert-inner {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 14px 28px 14px 20px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Icon / avatar area */
+.alert-icon {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  position: relative;
+  margin-right: 16px;
+}
+
+.alert-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  border: 2px solid var(--crimson-bright);
+  filter: drop-shadow(0 0 8px var(--crimson-glow));
+}
+
+/* Fallback symbol when no image */
+.alert-icon .icon-symbol {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  background: linear-gradient(135deg, var(--crimson-deep), var(--crimson));
+  border: 2px solid var(--crimson-bright);
+  filter: drop-shadow(0 0 8px var(--crimson-glow));
+  color: var(--white);
+}
+
+.alert-icon::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  background: var(--crimson-glow);
+  z-index: -1;
+  filter: blur(8px);
+  opacity: 0.5;
+  animation: iconGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes iconGlow {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 0.8; }
+}
+
+/* Text area */
+.alert-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.alert-type {
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--crimson-glow);
+  opacity: 0.8;
+}
+
+.alert-headline {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 36px;
+  line-height: 1;
+  letter-spacing: 2px;
+  color: var(--white);
+  text-shadow:
+    0 0 20px var(--crimson-glow),
+    0 0 40px var(--crimson),
+    2px 2px 0 var(--crimson-deep);
+}
+
+.alert-headline .highlight {
+  color: var(--gold-bright);
+  text-shadow:
+    0 0 20px var(--gold),
+    0 0 40px rgba(255,215,0,0.4),
+    2px 2px 0 rgba(100,80,0,0.8);
+}
+
+.alert-subtext {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--ash);
+  margin-top: 2px;
+}
+
+/* Tier badge */
+.tier-badge {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-family: 'Orbitron', monospace;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  padding: 3px 10px;
+  background: linear-gradient(90deg, var(--crimson-deep), var(--crimson));
+  border: 1px solid var(--crimson-bright);
+  color: var(--gold-bright);
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   PARTICLE / BLOOD DRIP EFFECT
+   ============================================================ */
+
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  clip-path: polygon(16px 0%, 100% 0%, calc(100% - 16px) 100%, 0% 100%);
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--crimson-glow);
+  top: -10px;
+  opacity: 0;
+  animation: drip 1.5s ease-in forwards;
+}
+
+.particle:nth-child(1)  { left: 8%;  width: 2px; height: 18px; animation-delay: 0.1s; animation-duration: 1.2s; }
+.particle:nth-child(2)  { left: 18%; width: 1px; height: 12px; animation-delay: 0.3s; animation-duration: 1.5s; }
+.particle:nth-child(3)  { left: 28%; width: 3px; height: 22px; animation-delay: 0.0s; animation-duration: 1.3s; }
+.particle:nth-child(4)  { left: 40%; width: 1px; height: 16px; animation-delay: 0.4s; animation-duration: 1.1s; }
+.particle:nth-child(5)  { left: 52%; width: 2px; height: 20px; animation-delay: 0.2s; animation-duration: 1.4s; }
+.particle:nth-child(6)  { left: 63%; width: 1px; height: 14px; animation-delay: 0.5s; animation-duration: 1.6s; }
+.particle:nth-child(7)  { left: 74%; width: 3px; height: 18px; animation-delay: 0.1s; animation-duration: 1.2s; }
+.particle:nth-child(8)  { left: 85%; width: 2px; height: 24px; animation-delay: 0.3s; animation-duration: 1.0s; }
+.particle:nth-child(9)  { left: 93%; width: 1px; height: 15px; animation-delay: 0.6s; animation-duration: 1.3s; }
+
+@keyframes drip {
+  0%   { opacity: 0;   transform: translateY(0)    scaleY(0); }
+  20%  { opacity: 1;   transform: translateY(0)    scaleY(1); }
+  100% { opacity: 0.3; transform: translateY(80px) scaleY(1); }
+}
+
+/* ============================================================
+   CORNER MARKS
+   ============================================================ */
+
+.corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.6;
+}
+.corner-tl { top: 6px;  left: 22px;  border-width: 2px 0 0 2px; }
+.corner-tr { top: 6px;  right: 22px; border-width: 2px 2px 0 0; }
+.corner-bl { bottom: 6px; left: 22px;  border-width: 0 0 2px 2px; }
+.corner-br { bottom: 6px; right: 22px; border-width: 0 2px 2px 0; }
+
+/* ============================================================
+   SKULL WATERMARK
+   ============================================================ */
+
+.skull-watermark {
+  position: absolute;
+  right: 24px;
+  bottom: 8px;
+  font-size: 48px;
+  opacity: 0.05;
+  pointer-events: none;
+  filter: blur(1px);
+  color: var(--crimson-bright);
+}
+
+/* ============================================================
+   ALERT TYPE VARIANTS
+   ============================================================ */
+
+/* FOLLOW — standard crimson */
+.alert-follow .alert-card {
+  border-color: var(--crimson-bright);
+}
+
+/* SUB — gold accent */
+.alert-sub .alert-card {
+  border-color: var(--gold);
+}
+.alert-sub .alert-card::before {
+  background: linear-gradient(135deg, var(--gold), var(--crimson-deep), var(--gold));
+}
+.alert-sub .alert-card::after {
+  background: linear-gradient(90deg, transparent, var(--gold-bright), var(--crimson-glow), var(--gold-bright), transparent);
+}
+.alert-sub .alert-type { color: var(--gold-bright); }
+.alert-sub .alert-icon .icon-symbol {
+  background: linear-gradient(135deg, #3a2800, #6a4a00);
+  border-color: var(--gold);
+}
+.alert-sub .alert-icon::after { background: var(--gold); }
+
+/* BITS — electric blue-white flash on crimson */
+.alert-bits .alert-card {
+  border-color: #4488FF;
+}
+.alert-bits .alert-card::before {
+  background: linear-gradient(135deg, #4488FF, var(--crimson-deep), #4488FF);
+}
+.alert-bits .alert-type { color: #88BBFF; }
+.alert-bits .alert-icon .icon-symbol {
+  background: linear-gradient(135deg, #001040, #002080);
+  border-color: #4488FF;
+}
+.alert-bits .alert-icon::after { background: #4488FF; }
+
+/* RAID — intense full-crimson surge */
+.alert-raid .alert-card {
+  border-color: var(--crimson-glow);
+  background: linear-gradient(135deg,
+    rgba(30,0,0,0.98) 0%,
+    rgba(80,0,0,0.96) 40%,
+    rgba(30,0,0,0.98) 100%
+  );
+}
+.alert-raid .alert-headline {
+  font-size: 32px;
+}
+.alert-raid .alert-type { letter-spacing: 6px; animation: warningFlash 0.4s step-end infinite; }
+
+@keyframes warningFlash {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* DONATION — green-gold prestige */
+.alert-donation .alert-card {
+  border-color: #44BB44;
+}
+.alert-donation .alert-card::before {
+  background: linear-gradient(135deg, #44BB44, var(--crimson-deep), #44BB44);
+}
+.alert-donation .alert-type { color: #88FF88; }
+.alert-donation .alert-icon .icon-symbol {
+  background: linear-gradient(135deg, #001800, #003800);
+  border-color: #44BB44;
+}
+.alert-donation .alert-icon::after { background: #44BB44; }
+
+/* GIFTSUB — purple-gold */
+.alert-giftsub .alert-card {
+  border-color: #AA44FF;
+}
+.alert-giftsub .alert-card::before {
+  background: linear-gradient(135deg, #AA44FF, var(--crimson-deep), #AA44FF);
+}
+.alert-giftsub .alert-type { color: #CC88FF; }
+.alert-giftsub .alert-icon .icon-symbol {
+  background: linear-gradient(135deg, #1a0030, #3a0060);
+  border-color: #AA44FF;
+}
+.alert-giftsub .alert-icon::after { background: #AA44FF; }
+
+/* ============================================================
+   DEMO CONTROLS (remove when using in OBS)
+   ============================================================ */
+
+.demo-controls {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  z-index: 100;
+}
+
+.demo-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 8px 16px;
+  background: rgba(10,0,0,0.9);
+  border: 1px solid var(--crimson);
+  color: var(--crimson-glow);
+  cursor: pointer;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.demo-btn:hover {
+  background: var(--crimson-deep);
+  border-color: var(--crimson-glow);
+  color: var(--white);
+}
+
+/* ============================================================
+   OBS INSTRUCTIONS OVERLAY (remove when using in OBS)
+   ============================================================ */
+.instructions {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  text-align: right;
+  line-height: 1.6;
+}
+
+</style>
+</head>
+<body>
+
+<!-- DEMO CONTROLS - remove this section when adding to OBS -->
+<div class="demo-controls">
+  <button class="demo-btn" onclick="triggerAlert('follow')">Follow</button>
+  <button class="demo-btn" onclick="triggerAlert('sub')">Sub T1</button>
+  <button class="demo-btn" onclick="triggerAlert('sub2')">Sub T2</button>
+  <button class="demo-btn" onclick="triggerAlert('sub3')">Sub T3</button>
+  <button class="demo-btn" onclick="triggerAlert('resub')">Resub</button>
+  <button class="demo-btn" onclick="triggerAlert('bits')">Bits</button>
+  <button class="demo-btn" onclick="triggerAlert('raid')">Raid</button>
+  <button class="demo-btn" onclick="triggerAlert('donation')">Donation</button>
+  <button class="demo-btn" onclick="triggerAlert('giftsub')">Gift Sub</button>
+</div>
+
+<!-- ALERT WRAPPER — this is what shows on stream -->
+<div class="alert-wrapper" id="alertWrapper">
+  <div class="alert-card" id="alertCard">
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+    <div class="skull-watermark">&#x2620;</div>
+    <div class="alert-inner">
+      <div class="alert-icon" id="alertIcon">
+        <div class="icon-symbol" id="alertIconSymbol">&#x2620;</div>
+      </div>
+      <div class="alert-text">
+        <div class="alert-type" id="alertType">ALERT</div>
+        <div class="alert-headline" id="alertHeadline">Loading...</div>
+        <div class="alert-subtext" id="alertSubtext"></div>
+      </div>
+    </div>
+    <div class="tier-badge" id="tierBadge" style="display:none"></div>
+  </div>
+</div>
+
+<div class="instructions">
+  PREVIEW MODE &mdash; Remove demo controls when adding to OBS<br>
+  Add as Browser Source &bull; 600x200px &bull; Transparent BG
+</div>
+
+<script>
+
+// ============================================================
+//   ALERT DEFINITIONS
+// ============================================================
+
+var ALERTS = {
+
+  follow: {
+    wrapperClass: 'alert-follow',
+    icon:      '&#x2295;',   // Replace with: <img src="your-logo.png">
+    type:      'NEW RECRUIT',
+    headline:  '<span class="highlight">{user}</span> HAS JOINED THE CRIMSON LEGION',
+    subtext:   'Another warrior enlists in the Arena',
+    tier:      null,
+    sound:     'follow.mp3'  // place audio file next to this HTML
+  },
+
+  sub: {
+    wrapperClass: 'alert-sub alert-sub1',
+    icon:      '&#x2605;',
+    type:      "REAPER'S INITIATE",
+    headline:  '<span class="highlight">{user}</span> SWEARS ALLEGIANCE',
+    subtext:   'Tier 1 Subscriber',
+    tier:      "TIER I",
+    sound:     'sub1.mp3'   // metal clank / single impact
+  },
+
+  sub2: {
+    wrapperClass: 'alert-sub alert-sub2',
+    icon:      '&#x2605;&#x2605;',
+    type:      "REAPER'S CHOSEN",
+    headline:  '<span class="highlight">{user}</span> HAS BEEN MARKED',
+    subtext:   'Tier 2 Subscriber',
+    tier:      "TIER II",
+    sound:     'sub2.mp3'   // deeper cinematic impact / rumble
+  },
+
+  sub3: {
+    wrapperClass: 'alert-sub alert-sub3',
+    icon:      '&#x2620;',
+    type:      'BLOODSWORN',
+    headline:  '<span class="highlight">{user}</span> ENTERS THE ELITE CIRCLE',
+    subtext:   'Tier 3 Subscriber — The Legion grows stronger',
+    tier:      "BLOODSWORN",
+    sound:     'sub3.mp3'
+  },
+
+  resub: {
+    wrapperClass: 'alert-sub',
+    icon:      '&#x21BB;',
+    type:      'OATH RENEWED',
+    headline:  '<span class="highlight">{user}</span> &mdash; {months} MONTHS STRONG',
+    subtext:   'Continued service to The Crimson Legion',
+    tier:      null,
+    sound:     'resub.mp3'
+  },
+
+  bits: {
+    wrapperClass: 'alert-bits',
+    icon:      '&#x25C6;',
+    type:      'TACTICAL SUPPORT',
+    headline:  '<span class="highlight">{user}</span> DEPLOYS {amount} BITS',
+    subtext:   'Fire support received — Arena reinforced',
+    tier:      null,
+    sound:     'bits.mp3'
+  },
+
+  raid: {
+    wrapperClass: 'alert-raid',
+    icon:      '&#x26A0;',
+    type:      '!! RAID INCOMING !!',
+    headline:  '<span class="highlight">{user}</span> LEADS {amount} WARRIORS',
+    subtext:   'RAID PROTOCOL ACTIVATED — Breach detected',
+    tier:      "RAID",
+    sound:     'raid.mp3'
+  },
+
+  donation: {
+    wrapperClass: 'alert-donation',
+    icon:      '&#x24C3;',
+    type:      'TACTICAL FUNDS',
+    headline:  '<span class="highlight">{user}</span> DEPLOYS ${amount}',
+    subtext:   'Financial support received — The Reaper is grateful',
+    tier:      null,
+    sound:     'donation.mp3'
+  },
+
+  giftsub: {
+    wrapperClass: 'alert-giftsub',
+    icon:      '&#x25A0;',
+    type:      'GIFT DEPLOYMENT',
+    headline:  '<span class="highlight">{user}</span> ARMS {recipient}',
+    subtext:   'Gifted sub delivered — A new warrior joins the fight',
+    tier:      null,
+    sound:     'giftsub.mp3'
+  }
+
+};
+
+// ============================================================
+//   DEMO DATA (replace with real event data in production)
+// ============================================================
+
+var DEMO_DATA = {
+  follow:   { user: 'ShadowMarksman',  amount: null,   months: null, recipient: null },
+  sub:      { user: 'IronPhantom99',   amount: null,   months: null, recipient: null },
+  sub2:     { user: 'NightReaper',     amount: null,   months: null, recipient: null },
+  sub3:     { user: 'CrimsonVanguard', amount: null,   months: null, recipient: null },
+  resub:    { user: 'TacOperator7',    amount: null,   months: '14', recipient: null },
+  bits:     { user: 'GhostRecon_X',    amount: '500',  months: null, recipient: null },
+  raid:     { user: 'WarZoneCommander',amount: '127',  months: null, recipient: null },
+  donation: { user: 'SpecOps_Delta',   amount: '10.00',months: null, recipient: null },
+  giftsub:  { user: 'Mirrakillz',      amount: null,   months: null, recipient: 'NewRecruit_22' }
+};
+
+// ============================================================
+//   ALERT ENGINE
+// ============================================================
+
+var alertTimer = null;
+
+function triggerAlert(type, data) {
+  var config = ALERTS[type];
+  if (!config) return;
+
+  data = data || DEMO_DATA[type] || {};
+
+  // Clear any existing alert
+  clearTimeout(alertTimer);
+  var wrapper = document.getElementById('alertWrapper');
+  wrapper.className = 'alert-wrapper';
+  wrapper.offsetHeight; // force reflow
+
+  // Apply type class to wrapper for color variants
+  wrapper.className = 'alert-wrapper ' + config.wrapperClass;
+
+  // Fill in content
+  document.getElementById('alertType').innerHTML = config.type;
+
+  var headline = config.headline
+    .replace('{user}',      data.user      || 'Someone')
+    .replace('{amount}',    data.amount    || '0')
+    .replace('{months}',    data.months    || '?')
+    .replace('{recipient}', data.recipient || 'A Warrior');
+
+  document.getElementById('alertHeadline').innerHTML = headline;
+  document.getElementById('alertSubtext').innerHTML  = config.subtext;
+  document.getElementById('alertIconSymbol').innerHTML = config.icon;
+
+  var tierBadge = document.getElementById('tierBadge');
+  if (config.tier) {
+    tierBadge.style.display = 'block';
+    tierBadge.innerHTML = config.tier;
+  } else {
+    tierBadge.style.display = 'none';
+  }
+
+  // Play sound if file exists
+  if (config.sound) {
+    try {
+      var audio = new Audio(config.sound);
+      audio.volume = 0.7;
+      audio.play().catch(function() {});
+    } catch(e) {}
+  }
+
+  // Trigger animation
+  wrapper.classList.add('show');
+
+  // Auto-hide after 5 seconds
+  alertTimer = setTimeout(function() {
+    wrapper.className = 'alert-wrapper';
+  }, 5100);
+}
+
+// ============================================================
+//   STREAMLABS / SE.LIVE WIDGET API HOOK
+//   Uncomment and use this when connected to Streamlabs
+// ============================================================
+
+/*
+window.addEventListener('onEventReceived', function(obj) {
+  var event = obj.detail;
+  var listener = event.listener;
+  var data = event.event;
+
+  if (listener === 'follower-latest') {
+    triggerAlert('follow', { user: data.name });
+  }
+  else if (listener === 'subscriber-latest') {
+    var type = 'sub';
+    if (data.subPlan === '2000') type = 'sub2';
+    if (data.subPlan === '3000') type = 'sub3';
+    if (data.gifted) {
+      triggerAlert('giftsub', { user: data.sender, recipient: data.name });
+    } else if (data.months > 1) {
+      triggerAlert('resub', { user: data.name, months: data.months });
+    } else {
+      triggerAlert(type, { user: data.name });
+    }
+  }
+  else if (listener === 'cheer-latest') {
+    triggerAlert('bits', { user: data.name, amount: data.amount });
+  }
+  else if (listener === 'raid-latest') {
+    triggerAlert('raid', { user: data.name, amount: data.raiders });
+  }
+  else if (listener === 'tip-latest') {
+    triggerAlert('donation', { user: data.name, amount: parseFloat(data.amount).toFixed(2) });
+  }
+});
+*/
+
+</script>
+</body>
+</html>
