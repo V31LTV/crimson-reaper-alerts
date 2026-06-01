@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Crimson Reaper Main Overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   CRIMSON REAPER MAIN OVERLAY
+   1920x1080 Browser Source — Transparent Background
+   Bottom bar with Recent Follows, Subs, Donations, Bits
+   ============================================================ */
+
+:root {
+  --crimson:        #8B0000;
+  --crimson-bright: #CC0000;
+  --crimson-glow:   #FF1111;
+  --crimson-deep:   #4A0000;
+  --gold:           #C9A84C;
+  --gold-bright:    #FFD700;
+  --blue:           #4488FF;
+  --blue-bright:    #88BBFF;
+  --green:          #44BB44;
+  --green-bright:   #88FF88;
+  --purple:         #AA44FF;
+  --purple-bright:  #CC88FF;
+  --ash:            #AAAAAA;
+  --white:          #F0E8E8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 1920px;
+  height: 1080px;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* ============================================================
+   BOTTOM BAR CONTAINER
+   ============================================================ */
+
+.bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 110px;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+/* Shared panel base */
+.panel {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 24px;
+  background: linear-gradient(135deg,
+    rgba(8,0,0,0.96) 0%,
+    rgba(20,0,0,0.94) 50%,
+    rgba(8,0,0,0.96) 100%
+  );
+  border-top: 1px solid var(--crimson);
+  border-right: 1px solid rgba(139,0,0,0.3);
+  overflow: hidden;
+}
+
+.panel:last-child { border-right: none; }
+
+/* Panel top accent line */
+.panel::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  opacity: 0.8;
+}
+
+.panel-follows::after  { background: linear-gradient(90deg, transparent, var(--crimson-glow), transparent); }
+.panel-subs::after     { background: linear-gradient(90deg, transparent, var(--gold-bright), transparent); }
+.panel-donations::after{ background: linear-gradient(90deg, transparent, var(--green-bright), transparent); }
+.panel-bits::after     { background: linear-gradient(90deg, transparent, var(--blue-bright), transparent); }
+
+/* Vertical divider between panels */
+.panel-divider {
+  width: 1px;
+  align-self: stretch;
+  background: linear-gradient(180deg,
+    transparent,
+    rgba(139,0,0,0.6) 30%,
+    rgba(201,168,76,0.4) 50%,
+    rgba(139,0,0,0.6) 70%,
+    transparent
+  );
+}
+
+/* Panel glow bg */
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-size: 4px 4px;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+}
+
+/* ============================================================
+   PANEL HEADER
+   ============================================================ */
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.panel-icon {
+  font-size: 12px;
+  width: 20px;
+  text-align: center;
+}
+
+.panel-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.panel-follows  .panel-label { color: var(--crimson-glow); }
+.panel-subs     .panel-label { color: var(--gold-bright); }
+.panel-donations .panel-label { color: var(--green-bright); }
+.panel-bits     .panel-label { color: var(--blue-bright); }
+
+.panel-count {
+  margin-left: auto;
+  font-family: 'Orbitron', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--ash);
+  opacity: 0.6;
+}
+
+/* ============================================================
+   CYCLING ENTRY DISPLAY
+   ============================================================ */
+
+.entry-display {
+  position: relative;
+  height: 42px;
+  overflow: hidden;
+}
+
+.entry {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.entry.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.entry.exit {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Entry rank badge */
+.entry-rank {
+  font-family: 'Orbitron', monospace;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.panel-follows  .entry-rank { background: var(--crimson-deep); color: var(--crimson-glow); }
+.panel-subs     .entry-rank { background: #3a2800; color: var(--gold-bright); }
+.panel-donations .entry-rank { background: #001800; color: var(--green-bright); }
+.panel-bits     .entry-rank { background: #001040; color: var(--blue-bright); }
+
+/* Entry name */
+.entry-name {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 26px;
+  letter-spacing: 2px;
+  line-height: 1;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-follows  .entry-name { color: var(--white); text-shadow: 0 0 12px var(--crimson-glow); }
+.panel-subs     .entry-name { color: var(--white); text-shadow: 0 0 12px var(--gold); }
+.panel-donations .entry-name { color: var(--white); text-shadow: 0 0 12px var(--green); }
+.panel-bits     .entry-name { color: var(--white); text-shadow: 0 0 12px var(--blue); }
+
+/* Entry amount */
+.entry-amount {
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.panel-donations .entry-amount { color: var(--gold-bright); }
+.panel-bits      .entry-amount { color: var(--blue-bright); }
+
+/* Entry sub tier */
+.entry-tier {
+  font-family: 'Orbitron', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 2px 6px;
+  clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  flex-shrink: 0;
+}
+
+.tier-1 { background: rgba(74,0,0,0.8); color: var(--gold-bright); border: 1px solid var(--gold); }
+.tier-2 { background: rgba(26,0,48,0.8); color: var(--purple-bright); border: 1px solid var(--purple); }
+.tier-3 { background: rgba(74,0,0,0.9); color: var(--gold-bright); border: 1px solid var(--gold-bright); }
+.tier-p { background: rgba(20,0,50,0.9); color: #CC88FF; border: 1px solid #9B59B6; }
+
+/* ============================================================
+   CYCLE INDICATOR DOTS
+   ============================================================ */
+
+.cycle-dots {
+  position: absolute;
+  bottom: 6px;
+  right: 10px;
+  display: flex;
+  gap: 4px;
+}
+
+.cycle-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.panel-follows  .cycle-dot.active { background: var(--crimson-glow); box-shadow: 0 0 4px var(--crimson-glow); }
+.panel-subs     .cycle-dot.active { background: var(--gold-bright);  box-shadow: 0 0 4px var(--gold); }
+.panel-donations .cycle-dot.active { background: var(--green-bright); box-shadow: 0 0 4px var(--green); }
+.panel-bits     .cycle-dot.active { background: var(--blue-bright);  box-shadow: 0 0 4px var(--blue); }
+
+/* ============================================================
+   CORNER MARKS ON BAR
+   ============================================================ */
+
+.bar-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.5;
+  z-index: 10;
+}
+.bar-corner.tl { top: 4px;  left: 4px;  border-width: 2px 0 0 2px; }
+.bar-corner.tr { top: 4px;  right: 4px; border-width: 2px 2px 0 0; }
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.entry-empty {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 42px;
+  display: flex;
+  align-items: center;
+}
+
+.entry-empty-text {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.15);
+  text-transform: uppercase;
+}
+
+</style>
+</head>
+<body>
+
+<div class="bottom-bar">
+
+  <!-- Bar corner marks -->
+  <div class="bar-corner tl"></div>
+  <div class="bar-corner tr"></div>
+
+  <!-- ==================== FOLLOWS ==================== -->
+  <div class="panel panel-follows">
+    <div class="panel-header">
+      <span class="panel-icon">&#x2295;</span>
+      <span class="panel-label">Recent Follows</span>
+      <span class="panel-count" id="follows-count">0</span>
+    </div>
+    <div class="entry-display" id="follows-display">
+      <div class="entry-empty">
+        <span class="entry-empty-text">Awaiting recruits...</span>
+      </div>
+    </div>
+    <div class="cycle-dots" id="follows-dots"></div>
+  </div>
+
+  <div class="panel-divider"></div>
+
+  <!-- ==================== SUBS ==================== -->
+  <div class="panel panel-subs">
+    <div class="panel-header">
+      <span class="panel-icon">&#x2605;</span>
+      <span class="panel-label">Recent Subs</span>
+      <span class="panel-count" id="subs-count">0</span>
+    </div>
+    <div class="entry-display" id="subs-display">
+      <div class="entry-empty">
+        <span class="entry-empty-text">Awaiting allegiance...</span>
+      </div>
+    </div>
+    <div class="cycle-dots" id="subs-dots"></div>
+  </div>
+
+  <div class="panel-divider"></div>
+
+  <!-- ==================== DONATIONS ==================== -->
+  <div class="panel panel-donations">
+    <div class="panel-header">
+      <span class="panel-icon">&#x24C3;</span>
+      <span class="panel-label">Recent Donations</span>
+      <span class="panel-count" id="donations-count">0</span>
+    </div>
+    <div class="entry-display" id="donations-display">
+      <div class="entry-empty">
+        <span class="entry-empty-text">Awaiting tactical funds...</span>
+      </div>
+    </div>
+    <div class="cycle-dots" id="donations-dots"></div>
+  </div>
+
+  <div class="panel-divider"></div>
+
+  <!-- ==================== BITS ==================== -->
+  <div class="panel panel-bits">
+    <div class="panel-header">
+      <span class="panel-icon">&#x25C6;</span>
+      <span class="panel-label">Recent Bits</span>
+      <span class="panel-count" id="bits-count">0</span>
+    </div>
+    <div class="entry-display" id="bits-display">
+      <div class="entry-empty">
+        <span class="entry-empty-text">Awaiting fire support...</span>
+      </div>
+    </div>
+    <div class="cycle-dots" id="bits-dots"></div>
+  </div>
+
+</div>
+
+<script>
+
+// ============================================================
+//   DATA STORE — holds up to 10 entries per category
+// ============================================================
+
+var data = {
+  follows:   [],
+  subs:      [],
+  donations: [],
+  bits:      []
+};
+
+// Current displayed index per panel
+var indices = { follows: 0, subs: 0, donations: 0, bits: 0 };
+
+// Cycle interval handles
+var timers = {};
+
+// ============================================================
+//   ADD ENTRY FUNCTIONS
+// ============================================================
+
+function addFollow(name) {
+  data.follows.unshift({ name: name });
+  if (data.follows.length > 10) data.follows.pop();
+  refreshPanel('follows');
+}
+
+function addSub(name, tier) {
+  // tier: '1000', '2000', '3000', 'Prime'
+  data.subs.unshift({ name: name, tier: tier || '1000' });
+  if (data.subs.length > 10) data.subs.pop();
+  refreshPanel('subs');
+}
+
+function addDonation(name, amount) {
+  data.donations.unshift({ name: name, amount: '$' + parseFloat(amount).toFixed(2) });
+  if (data.donations.length > 10) data.donations.pop();
+  refreshPanel('donations');
+}
+
+function addBits(name, amount) {
+  data.bits.unshift({ name: name, amount: amount + ' bits' });
+  if (data.bits.length > 10) data.bits.pop();
+  refreshPanel('bits');
+}
+
+// ============================================================
+//   PANEL RENDERER
+// ============================================================
+
+function refreshPanel(type) {
+  var entries = data[type].slice(0, 3);
+  var display = document.getElementById(type + '-display');
+  var dots    = document.getElementById(type + '-dots');
+  var count   = document.getElementById(type + '-count');
+
+  // Update count
+  count.textContent = data[type].length;
+
+  // Clear display
+  display.innerHTML = '';
+
+  if (entries.length === 0) {
+    var empty = document.createElement('div');
+    empty.className = 'entry-empty';
+    empty.innerHTML = '<span class="entry-empty-text">Awaiting...</span>';
+    display.appendChild(empty);
+    dots.innerHTML = '';
+    return;
+  }
+
+  // Build entry elements
+  entries.forEach(function(item, i) {
+    var el = document.createElement('div');
+    el.className = 'entry' + (i === 0 ? ' active' : '');
+    el.dataset.index = i;
+
+    var rankEl = document.createElement('div');
+    rankEl.className = 'entry-rank';
+    rankEl.textContent = i + 1;
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'entry-name';
+    nameEl.textContent = item.name;
+
+    el.appendChild(rankEl);
+    el.appendChild(nameEl);
+
+    if (type === 'donations' || type === 'bits') {
+      var amountEl = document.createElement('div');
+      amountEl.className = 'entry-amount';
+      amountEl.textContent = item.amount;
+      el.appendChild(amountEl);
+    }
+
+    if (type === 'subs' && item.tier) {
+      var tierEl = document.createElement('div');
+      var tierClass = 'tier-1';
+      var tierText  = 'T1';
+      if (item.tier === '2000')  { tierClass = 'tier-2'; tierText = 'T2'; }
+      if (item.tier === '3000')  { tierClass = 'tier-3'; tierText = 'T3'; }
+      if (item.tier === 'Prime') { tierClass = 'tier-p'; tierText = 'PRIME'; }
+      tierEl.className = 'entry-tier ' + tierClass;
+      tierEl.textContent = tierText;
+      el.appendChild(tierEl);
+    }
+
+    display.appendChild(el);
+  });
+
+  // Build dots
+  dots.innerHTML = '';
+  entries.forEach(function(_, i) {
+    var dot = document.createElement('div');
+    dot.className = 'cycle-dot' + (i === 0 ? ' active' : '');
+    dots.appendChild(dot);
+  });
+
+  // Reset index and restart cycling
+  indices[type] = 0;
+  startCycle(type);
+}
+
+// ============================================================
+//   CYCLING ENGINE
+// ============================================================
+
+function startCycle(type) {
+  if (timers[type]) clearInterval(timers[type]);
+
+  timers[type] = setInterval(function() {
+    var entries = data[type].slice(0, 3);
+    if (entries.length <= 1) return;
+
+    var display = document.getElementById(type + '-display');
+    var dots    = document.getElementById(type + '-dots');
+    var allEntries = display.querySelectorAll('.entry');
+    var allDots    = dots.querySelectorAll('.cycle-dot');
+
+    if (allEntries.length === 0) return;
+
+    // Exit current
+    var current = allEntries[indices[type]];
+    if (current) {
+      current.classList.remove('active');
+      current.classList.add('exit');
+      setTimeout(function() {
+        if (current) current.classList.remove('exit');
+      }, 400);
+    }
+
+    // Advance index
+    indices[type] = (indices[type] + 1) % entries.length;
+
+    // Activate next
+    var next = allEntries[indices[type]];
+    if (next) next.classList.add('active');
+
+    // Update dots
+    allDots.forEach(function(d, i) {
+      d.classList.toggle('active', i === indices[type]);
+    });
+
+  }, 4000); // cycle every 4 seconds
+}
+
+// ============================================================
+//   STREAMLABS EVENT HOOK
+// ============================================================
+
+window.addEventListener('onEventReceived', function(obj) {
+  var event    = obj.detail;
+  var listener = event.listener;
+  var d        = event.event;
+
+  if (listener === 'follower-latest') {
+    addFollow(d.name);
+  }
+  else if (listener === 'subscriber-latest') {
+    addSub(d.name, d.subPlan || '1000');
+  }
+  else if (listener === 'cheer-latest') {
+    addBits(d.name, d.amount);
+  }
+  else if (listener === 'tip-latest') {
+    addDonation(d.name, d.amount);
+  }
+});
+
+// ============================================================
+//   DEMO DATA — remove before going live
+// ============================================================
+
+setTimeout(function() {
+  addFollow('ShadowMarksman');
+  addFollow('NightReaper_X');
+  addFollow('CrimsonVanguard');
+
+  addSub('IronPhantom99', '1000');
+  addSub('TacOperator7', '2000');
+  addSub('BloodswornElite', '3000');
+
+  addDonation('SpecOps_Delta', '10.00');
+  addDonation('GhostRecon_X', '5.00');
+  addDonation('WarZoneCmd', '25.00');
+
+  addBits('WiseMindKrak', '500');
+  addBits('CrimsonAce', '100');
+  addBits('NightStalker7', '1000');
+}, 500);
+
+</script>
+</body>
+</html>
