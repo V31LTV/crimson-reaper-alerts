@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Crimson Reaper Chat Box</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   CRIMSON REAPER CHAT BOX
+   1920x1080 — Right side panel
+   Browser Source: 1920x1080, transparent background
+   ============================================================ */
+
+:root {
+  --crimson:        #8B0000;
+  --crimson-bright: #CC0000;
+  --crimson-glow:   #FF1111;
+  --crimson-deep:   #4A0000;
+  --gold:           #C9A84C;
+  --gold-bright:    #FFD700;
+  --ash:            #AAAAAA;
+  --white:          #F0E8E8;
+  --panel-bg:       rgba(6,0,0,0.92);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 1920px;
+  height: 1080px;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* ============================================================
+   CHAT PANEL
+   ============================================================ */
+
+.chat-panel {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  width: 380px;
+  bottom: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.chat-header {
+  position: relative;
+  height: 42px;
+  background: linear-gradient(135deg, rgba(30,0,0,0.98), rgba(60,0,0,0.96));
+  border-left: 2px solid var(--crimson-bright);
+  border-top: 2px solid var(--crimson-bright);
+  border-bottom: 1px solid var(--crimson-deep);
+  clip-path: polygon(0% 0%, calc(100% - 16px) 0%, 100% 16px, 100% 100%, 0% 100%);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.chat-header::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--crimson-glow), var(--gold), var(--crimson-glow));
+}
+
+.chat-header-icon {
+  font-size: 14px;
+  color: var(--crimson-glow);
+}
+
+.chat-header-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--white);
+  text-transform: uppercase;
+}
+
+.chat-header-count {
+  margin-left: auto;
+  font-family: 'Orbitron', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--crimson-glow);
+  opacity: 0.7;
+}
+
+/* Live dot */
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--crimson-glow);
+  box-shadow: 0 0 6px var(--crimson-glow);
+  animation: livePulse 1s step-end infinite;
+  flex-shrink: 0;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+/* Messages container */
+.chat-messages {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(180deg,
+    rgba(4,0,0,0.88) 0%,
+    rgba(8,0,0,0.92) 100%
+  );
+  border-left: 2px solid var(--crimson-bright);
+  border-right: none;
+  padding: 8px 0 8px 0;
+  gap: 0;
+  position: relative;
+}
+
+/* Top fade */
+.chat-messages::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: linear-gradient(180deg, rgba(4,0,0,0.95), transparent);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Bottom border accent */
+.chat-footer {
+  height: 6px;
+  background: linear-gradient(90deg, var(--crimson-glow), var(--gold), var(--crimson-glow));
+  border-left: 2px solid var(--crimson-bright);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   CHAT MESSAGE
+   ============================================================ */
+
+.chat-msg {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 14px 6px 12px;
+  border-left: 3px solid transparent;
+  position: relative;
+  animation: msgSlideIn 0.3s ease forwards;
+  flex-shrink: 0;
+}
+
+@keyframes msgSlideIn {
+  0%   { opacity: 0; transform: translateX(20px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.chat-msg:hover {
+  background: rgba(139,0,0,0.08);
+}
+
+/* Username row */
+.msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.msg-username {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.msg-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 1px 4px;
+  clip-path: polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%);
+}
+
+.badge-mod       { background: rgba(0,80,0,0.8);   color: #88FF88; border: 1px solid #44BB44; }
+.badge-sub       { background: rgba(74,0,0,0.8);   color: var(--gold-bright); border: 1px solid var(--gold); }
+.badge-vip       { background: rgba(80,0,80,0.8);  color: #CC88FF; border: 1px solid #AA44FF; }
+.badge-broadcaster { background: rgba(100,0,0,0.9); color: var(--crimson-glow); border: 1px solid var(--crimson-bright); }
+
+.msg-time {
+  margin-left: auto;
+  font-family: 'Orbitron', monospace;
+  font-size: 7px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 1px;
+}
+
+/* Message body */
+.msg-body {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: rgba(240,232,232,0.9);
+  word-wrap: break-word;
+  padding-left: 2px;
+}
+
+/* Highlighted message (mentions) */
+.chat-msg.mention {
+  background: rgba(139,0,0,0.15);
+  border-left-color: var(--crimson-glow);
+}
+
+.chat-msg.mention .msg-body {
+  color: var(--white);
+}
+
+/* Separator line between messages */
+.chat-msg + .chat-msg::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 14px; right: 14px;
+  height: 1px;
+  background: rgba(139,0,0,0.15);
+}
+
+/* Corner marks */
+.corner-mark {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.4;
+  z-index: 20;
+}
+.corner-mark.tl { top: 44px;  left: 2px;  border-width: 2px 0 0 2px; }
+.corner-mark.bl { bottom: 8px; left: 2px; border-width: 0 0 2px 2px; }
+
+</style>
+</head>
+<body>
+
+<div class="chat-panel">
+
+  <div class="corner-mark tl"></div>
+  <div class="corner-mark bl"></div>
+
+  <div class="chat-header">
+    <div class="live-dot"></div>
+    <span class="chat-header-icon">&#x2ChatBox;</span>
+    <span class="chat-header-label">Legion Comms</span>
+    <span class="chat-header-count" id="msg-count">0 MSGS</span>
+  </div>
+
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-footer"></div>
+
+</div>
+
+<script>
+
+var msgCount = 0;
+var MAX_MESSAGES = 30;
+
+// Username color palette — cycling through crimson theme colors
+var COLORS = [
+  '#FF4444', '#FF8844', '#FFD700', '#88FF88',
+  '#88BBFF', '#CC88FF', '#FF88CC', '#44FFCC',
+  '#FF6644', '#AAFFAA', '#FFAA44', '#44CCFF'
+];
+
+var userColors = {};
+
+function getUserColor(username) {
+  if (!userColors[username]) {
+    userColors[username] = COLORS[Object.keys(userColors).length % COLORS.length];
+  }
+  return userColors[username];
+}
+
+function getTime() {
+  var d = new Date();
+  var h = d.getHours().toString().padStart(2, '0');
+  var m = d.getMinutes().toString().padStart(2, '0');
+  return h + ':' + m;
+}
+
+function addMessage(username, message, badges, isMention) {
+  var container = document.getElementById('chat-messages');
+  msgCount++;
+
+  // Build message element
+  var msg = document.createElement('div');
+  msg.className = 'chat-msg' + (isMention ? ' mention' : '');
+
+  // Meta row
+  var meta = document.createElement('div');
+  meta.className = 'msg-meta';
+
+  // Badges
+  if (badges) {
+    badges.forEach(function(badge) {
+      var b = document.createElement('span');
+      b.className = 'msg-badge badge-' + badge;
+      var labels = { mod: 'MOD', sub: 'SUB', vip: 'VIP', broadcaster: 'HOST' };
+      b.textContent = labels[badge] || badge.toUpperCase();
+      meta.appendChild(b);
+    });
+  }
+
+  // Username
+  var nameEl = document.createElement('span');
+  nameEl.className = 'msg-username';
+  nameEl.style.color = getUserColor(username);
+  nameEl.textContent = username;
+  meta.appendChild(nameEl);
+
+  // Time
+  var timeEl = document.createElement('span');
+  timeEl.className = 'msg-time';
+  timeEl.textContent = getTime();
+  meta.appendChild(timeEl);
+
+  // Body
+  var body = document.createElement('div');
+  body.className = 'msg-body';
+  body.textContent = message;
+
+  // Border color matches username
+  msg.style.borderLeftColor = isMention
+    ? 'var(--crimson-glow)'
+    : getUserColor(username) + '44';
+
+  msg.appendChild(meta);
+  msg.appendChild(body);
+  container.appendChild(msg);
+
+  // Keep max messages
+  var allMsgs = container.querySelectorAll('.chat-msg');
+  if (allMsgs.length > MAX_MESSAGES) {
+    allMsgs[0].remove();
+  }
+
+  // Update count
+  document.getElementById('msg-count').textContent = msgCount + ' MSGS';
+
+  // Scroll to bottom
+  container.scrollTop = container.scrollHeight;
+}
+
+// ============================================================
+//   STREAMLABS EVENT HOOK
+// ============================================================
+
+window.addEventListener('onEventReceived', function(obj) {
+  var event = obj.detail;
+
+  if (event.listener === 'message') {
+    var d = event.event;
+    var badges = [];
+    if (d.tags && d.tags.broadcaster) badges.push('broadcaster');
+    if (d.tags && d.tags.mod)         badges.push('mod');
+    if (d.tags && d.tags.subscriber)  badges.push('sub');
+    if (d.tags && d.tags.vip)         badges.push('vip');
+
+    var isMention = d.message && d.message.toLowerCase().indexOf('mirrakillz') !== -1;
+    addMessage(d.name, d.message, badges, isMention);
+  }
+});
+
+// ============================================================
+//   DEMO MESSAGES
+// ============================================================
+
+var demoMsgs = [
+  { user: 'ShadowMarksman',  msg: 'LET\'S GO! Crimson Reaper in the building!', badges: [] },
+  { user: 'TacOperator7',    msg: 'That clutch play was insane bro PogChamp', badges: ['sub'] },
+  { user: 'NightReaper_X',   msg: '@mirrakillz what loadout are you running?', badges: [], mention: true },
+  { user: 'IronPhantom99',   msg: 'The Legion grows stronger every day', badges: ['sub', 'vip'] },
+  { user: 'ZioxMod',         msg: 'Welcome everyone! Stay hype!', badges: ['mod'] },
+  { user: 'CrimsonVanguard', msg: 'First time catching a live stream, this is fire', badges: [] },
+  { user: 'SpecOps_Delta',   msg: 'GGs all day every day', badges: ['sub'] },
+  { user: 'GhostRecon_X',    msg: 'The Crimson Reaper never misses', badges: [] },
+];
+
+var demoIndex = 0;
+function runDemo() {
+  if (demoIndex < demoMsgs.length) {
+    var d = demoMsgs[demoIndex];
+    addMessage(d.user, d.msg, d.badges || [], d.mention || false);
+    demoIndex++;
+    setTimeout(runDemo, 1200);
+  }
+}
+setTimeout(runDemo, 500);
+
+</script>
+</body>
+</html>

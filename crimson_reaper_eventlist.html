@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Crimson Reaper Event List</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   CRIMSON REAPER EVENT LIST
+   1920x1080 — Left side panel
+   ============================================================ */
+
+:root {
+  --crimson:        #8B0000;
+  --crimson-bright: #CC0000;
+  --crimson-glow:   #FF1111;
+  --crimson-deep:   #4A0000;
+  --gold:           #C9A84C;
+  --gold-bright:    #FFD700;
+  --blue:           #4488FF;
+  --blue-bright:    #88BBFF;
+  --green:          #44BB44;
+  --green-bright:   #88FF88;
+  --purple:         #AA44FF;
+  --purple-bright:  #CC88FF;
+  --ash:            #AAAAAA;
+  --white:          #F0E8E8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 1920px;
+  height: 1080px;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* ============================================================
+   EVENT LIST PANEL
+   ============================================================ */
+
+.event-panel {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  width: 360px;
+  bottom: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.event-header {
+  position: relative;
+  height: 42px;
+  background: linear-gradient(135deg, rgba(30,0,0,0.98), rgba(60,0,0,0.96));
+  border-right: 2px solid var(--crimson-bright);
+  border-top: 2px solid var(--crimson-bright);
+  clip-path: polygon(0% 0%, calc(100% - 0%) 0%, 100% 0%, 100% 100%, 16px 100%, 0% calc(100% - 16px));
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.event-header::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--crimson-glow), var(--gold), var(--crimson-glow));
+}
+
+.event-header-icon { font-size: 14px; color: var(--crimson-glow); }
+
+.event-header-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--white);
+}
+
+.event-header-count {
+  margin-left: auto;
+  font-family: 'Orbitron', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--crimson-glow);
+  opacity: 0.7;
+}
+
+/* Events container */
+.event-list {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: linear-gradient(180deg, rgba(4,0,0,0.88), rgba(8,0,0,0.92));
+  border-right: 2px solid var(--crimson-bright);
+  padding: 6px 0;
+  position: relative;
+}
+
+/* Bottom fade */
+.event-list::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(0deg, rgba(4,0,0,0.95), transparent);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.event-footer {
+  height: 6px;
+  background: linear-gradient(90deg, var(--crimson-glow), var(--gold), var(--crimson-glow));
+  border-right: 2px solid var(--crimson-bright);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   EVENT ITEM
+   ============================================================ */
+
+.event-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 12px;
+  border-bottom: 1px solid rgba(139,0,0,0.15);
+  position: relative;
+  border-left: 3px solid transparent;
+  animation: eventSlide 0.4s cubic-bezier(0.22,1,0.36,1) forwards;
+  flex-shrink: 0;
+}
+
+@keyframes eventSlide {
+  0%   { opacity: 0; transform: translateX(-20px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.event-item.new {
+  animation: eventSlide 0.4s cubic-bezier(0.22,1,0.36,1) forwards,
+             newFlash 1s ease forwards;
+}
+
+@keyframes newFlash {
+  0%   { background: rgba(139,0,0,0.3); }
+  100% { background: transparent; }
+}
+
+/* Event icon */
+.event-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+/* Event text */
+.event-text { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+
+.event-name {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 18px;
+  letter-spacing: 1px;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-desc {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--ash);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-amount {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.event-time {
+  font-family: 'Orbitron', monospace;
+  font-size: 7px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 3px;
+}
+
+/* Type variants */
+.event-follow  { border-left-color: var(--crimson-glow); }
+.event-follow  .event-icon { background: var(--crimson-deep); color: var(--crimson-glow); }
+.event-follow  .event-name { color: var(--white); text-shadow: 0 0 8px var(--crimson-glow); }
+
+.event-sub     { border-left-color: var(--gold-bright); }
+.event-sub     .event-icon { background: #3a2800; color: var(--gold-bright); }
+.event-sub     .event-name { color: var(--gold-bright); text-shadow: 0 0 8px var(--gold); }
+
+.event-resub   { border-left-color: var(--gold); }
+.event-resub   .event-icon { background: #3a2800; color: var(--gold); }
+.event-resub   .event-name { color: var(--white); text-shadow: 0 0 8px var(--gold); }
+
+.event-bits    { border-left-color: var(--blue-bright); }
+.event-bits    .event-icon { background: #001040; color: var(--blue-bright); }
+.event-bits    .event-name { color: var(--white); text-shadow: 0 0 8px var(--blue); }
+.event-bits    .event-amount { color: var(--blue-bright); }
+
+.event-donation { border-left-color: var(--green-bright); }
+.event-donation .event-icon { background: #001800; color: var(--green-bright); }
+.event-donation .event-name { color: var(--white); text-shadow: 0 0 8px var(--green); }
+.event-donation .event-amount { color: var(--gold-bright); }
+
+.event-raid    { border-left-color: var(--crimson-glow); }
+.event-raid    .event-icon { background: var(--crimson-deep); color: var(--gold-bright); }
+.event-raid    .event-name { color: var(--crimson-glow); text-shadow: 0 0 8px var(--crimson-glow); }
+.event-raid    .event-amount { color: var(--crimson-glow); }
+
+.event-giftsub { border-left-color: var(--purple-bright); }
+.event-giftsub .event-icon { background: #1a0030; color: var(--purple-bright); }
+.event-giftsub .event-name { color: var(--white); text-shadow: 0 0 8px var(--purple); }
+
+/* Corner marks */
+.corner-mark {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.4;
+  z-index: 20;
+}
+.corner-mark.tr { top: 44px;  right: 2px; border-width: 2px 2px 0 0; }
+.corner-mark.br { bottom: 8px; right: 2px; border-width: 0 2px 2px 0; }
+
+</style>
+</head>
+<body>
+
+<div class="event-panel">
+  <div class="corner-mark tr"></div>
+  <div class="corner-mark br"></div>
+
+  <div class="event-header">
+    <span class="event-header-icon">&#x25A0;</span>
+    <span class="event-header-label">Field Reports</span>
+    <span class="event-header-count" id="event-count">0 EVENTS</span>
+  </div>
+
+  <div class="event-list" id="event-list"></div>
+  <div class="event-footer"></div>
+</div>
+
+<script>
+
+var totalEvents = 0;
+var MAX_EVENTS = 20;
+
+var EVENT_ICONS = {
+  follow:   '&#x2295;',
+  sub:      '&#x2605;',
+  resub:    '&#x21BB;',
+  bits:     '&#x25C6;',
+  donation: '&#x24C3;',
+  raid:     '&#x26A0;',
+  giftsub:  '&#x25A0;'
+};
+
+var EVENT_LABELS = {
+  follow:   'NEW RECRUIT',
+  sub:      'ALLEGIANCE SWORN',
+  resub:    'OATH RENEWED',
+  bits:     'FIRE SUPPORT',
+  donation: 'TACTICAL FUNDS',
+  raid:     'RAID INCOMING',
+  giftsub:  'GIFT DEPLOYED'
+};
+
+function getTime() {
+  var d = new Date();
+  var h = d.getHours().toString().padStart(2, '0');
+  var m = d.getMinutes().toString().padStart(2, '0');
+  return h + ':' + m;
+}
+
+function addEvent(type, name, extra) {
+  var list = document.getElementById('event-list');
+  totalEvents++;
+
+  var item = document.createElement('div');
+  item.className = 'event-item event-' + type + ' new';
+
+  // Icon
+  var icon = document.createElement('div');
+  icon.className = 'event-icon';
+  icon.innerHTML = EVENT_ICONS[type] || '&#x25CF;';
+
+  // Text block
+  var text = document.createElement('div');
+  text.className = 'event-text';
+
+  var name_el = document.createElement('div');
+  name_el.className = 'event-name';
+  name_el.textContent = name;
+
+  var desc = document.createElement('div');
+  desc.className = 'event-desc';
+  desc.textContent = EVENT_LABELS[type] || type.toUpperCase();
+
+  text.appendChild(name_el);
+  text.appendChild(desc);
+
+  item.appendChild(icon);
+  item.appendChild(text);
+
+  // Amount if applicable
+  if (extra) {
+    var amt = document.createElement('div');
+    amt.className = 'event-amount';
+    amt.textContent = extra;
+    item.appendChild(amt);
+  }
+
+  // Time
+  var time = document.createElement('div');
+  time.className = 'event-time';
+  time.textContent = getTime();
+  item.appendChild(time);
+
+  // Prepend to top
+  var firstChild = list.firstChild;
+  if (firstChild) {
+    list.insertBefore(item, firstChild);
+  } else {
+    list.appendChild(item);
+  }
+
+  // Remove flash class after animation
+  setTimeout(function() { item.classList.remove('new'); }, 1000);
+
+  // Trim old events
+  var all = list.querySelectorAll('.event-item');
+  if (all.length > MAX_EVENTS) {
+    all[all.length - 1].remove();
+  }
+
+  // Update count
+  document.getElementById('event-count').textContent = totalEvents + ' EVENTS';
+}
+
+// ============================================================
+//   STREAMLABS EVENT HOOK
+// ============================================================
+
+window.addEventListener('onEventReceived', function(obj) {
+  var event    = obj.detail;
+  var listener = event.listener;
+  var d        = event.event;
+
+  if (listener === 'follower-latest') {
+    addEvent('follow', d.name, null);
+  }
+  else if (listener === 'subscriber-latest') {
+    if (d.gifted) {
+      addEvent('giftsub', d.name, 'GIFTED TO ' + d.gifter);
+    } else if (d.months > 1) {
+      addEvent('resub', d.name, d.months + ' MOS');
+    } else {
+      var tierLabel = 'T1';
+      if (d.subPlan === '2000') tierLabel = 'T2';
+      if (d.subPlan === '3000') tierLabel = 'T3';
+      if (d.subPlan === 'Prime') tierLabel = 'PRIME';
+      addEvent('sub', d.name, tierLabel);
+    }
+  }
+  else if (listener === 'cheer-latest') {
+    addEvent('bits', d.name, d.amount + ' BITS');
+  }
+  else if (listener === 'raid-latest') {
+    addEvent('raid', d.name, d.raiders + ' RAIDERS');
+  }
+  else if (listener === 'tip-latest') {
+    addEvent('donation', d.name, '$' + parseFloat(d.amount).toFixed(2));
+  }
+});
+
+// ============================================================
+//   DEMO EVENTS
+// ============================================================
+
+var demos = [
+  { type: 'follow',   name: 'ShadowMarksman',  extra: null },
+  { type: 'sub',      name: 'IronPhantom99',   extra: 'T1' },
+  { type: 'bits',     name: 'WiseMindKrak',    extra: '500 BITS' },
+  { type: 'follow',   name: 'NightReaper_X',   extra: null },
+  { type: 'donation', name: 'SpecOps_Delta',   extra: '$10.00' },
+  { type: 'raid',     name: 'WarZoneCmd',      extra: '47 RAIDERS' },
+  { type: 'resub',    name: 'TacOperator7',    extra: '14 MOS' },
+  { type: 'giftsub',  name: 'Mirrakillz',      extra: 'GIFTED TO NewRecruit' },
+  { type: 'sub',      name: 'BloodswornElite', extra: 'T3' },
+];
+
+var di = 0;
+function runDemo() {
+  if (di < demos.length) {
+    var d = demos[di];
+    addEvent(d.type, d.name, d.extra);
+    di++;
+    setTimeout(runDemo, 800);
+  }
+}
+setTimeout(runDemo, 500);
+
+</script>
+</body>
+</html>
